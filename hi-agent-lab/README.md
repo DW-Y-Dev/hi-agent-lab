@@ -13,7 +13,7 @@
 | 层 | 位置 | 作用 |
 |:--|:--|:--|
 | 命令层 | `commands/*.md` | 斜杠命令，编排 LLM 怎么当 Mentor |
-| MCP 层 | `server/server.js` | Node + `@modelcontextprotocol/sdk`，把课件暴露成工具给 LLM |
+| MCP 层 | `server/dist/server.js` | 打包后的 MCP server（自包含，学生无需 `npm install`），把课件暴露成工具给 LLM |
 | 内容层 | `labs/` | 课件（本地文件，老师在这里加） |
 
 ```
@@ -23,7 +23,8 @@ hi-agent-lab/
 ├── .mcp.json                  # 挂 MCP server
 ├── commands/                  # 斜杠命令
 ├── server/                    # MCP server（node + 官方 SDK）
-│   ├── server.js
+│   ├── server.js              # 源码
+│   ├── dist/server.js         # ★ 打包产物（自包含，.mcp.json 指向这里）
 │   └── lib/{paths,labs,check}.js
 ├── labs/                      # ★ 课件区 —— 老师在这里加 lab
 └── reviews/                   # (运行时生成) 提交的 review
@@ -39,15 +40,13 @@ hi-agent-lab/
 
 ### 方式一：本地快速跑通（推荐先这样试）
 
-1. 装依赖：
+> server 已打包成 `server/dist/server.js`（自包含），**无需 `npm install`**。
+
+1. 注册 MCP server（把 `<插件根>` 换成本目录绝对路径）：
    ```bash
-   cd hi-agent-lab/server && npm install
+   claude mcp add hi-agent-lab -- node "<插件根>/server/dist/server.js" "<插件根>"
    ```
-2. 注册 MCP server（把 `<插件根>` 换成本目录绝对路径）：
-   ```bash
-   claude mcp add hi-agent-lab -- node "<插件根>/server/server.js" "<插件根>"
-   ```
-3. 把命令放进 `~/.claude/commands/`（文件名即命令名）：
+2. 把命令放进 `~/.claude/commands/`（文件名即命令名）：
    ```
    commands/hi-agent.md         -> ~/.claude/commands/hi-agent.md
    commands/hi-agent-start.md   -> ~/.claude/commands/hi-agent-start.md
@@ -55,7 +54,7 @@ hi-agent-lab/
    commands/hi-agent-review.md  -> ~/.claude/commands/hi-agent-review.md
    commands/hi-agent-help.md    -> ~/.claude/commands/hi-agent-help.md
    ```
-4. 重启 Claude Code，输入 `/hi-agent` 即可看到 lab 列表并开始。
+3. 重启 Claude Code，输入 `/hi-agent` 即可看到 lab 列表并开始。
 
 ### 方式二：作为插件 / marketplace 分发给学生
 
@@ -63,6 +62,18 @@ hi-agent-lab/
 `.claude-plugin/marketplace.json`（已提供模板，`source` 指向 `./hi-agent-lab`）。
 学生先 `claude plugin marketplace add <那个上一级目录>`，再 `claude plugin install hi-agent-lab` 即可。
 （`.mcp.json` 里的 `${CLAUDE_PLUGIN_ROOT}` 会自动解析到插件安装位置。）
+
+> MCP server 已打包成 `server/dist/server.js` 提交，学生**无需再 `npm install`**。
+
+### 重新打包 MCP server（改 server 源码后）
+
+改了 `server/*.js` 后，重新生成自包含的 `server/dist/server.js`：
+
+```bash
+cd server && npx --yes esbuild server.js --bundle --platform=node --format=esm --outfile=dist/server.js
+```
+
+（`npx` 会临时拉 esbuild，无需常驻安装到项目里。）
 
 ---
 
