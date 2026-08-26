@@ -2,7 +2,7 @@
   "mcpServers": {
     "hi-agent-lab": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/server/server.js", "${CLAUDE_PLUGIN_ROOT}"]
+      "args": ["${CLAUDE_PLUGIN_ROOT}/server/dist/server.js", "${CLAUDE_PLUGIN_ROOT}"]
     }
   }
 }
