@@ -1,0 +1,16 @@
+{
+  "name": "hi-agent-lab-marketplace",
+  "description": "教学插件市场（demo）—— 把 Hi-agent Lab 分发给学生的市场清单。放本插件上一级目录用。",
+  "owner": {
+    "name": "Your Name",
+    "email": "you@example.com"
+  },
+  "plugins": [
+    {
+      "name": "hi-agent-lab",
+      "description": "本地课件教学插件 demo：Mentor 人格注入 + 私密教学脚本 + 参考解对照。课件存 labs/。",
+      "category": "education",
+      "source": "./hi-agent-lab"
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+# Hi-agent Lab
+
+一个用于教学的 Claude Code 插件 demo，核心教学机制：
+
+> **Mentor 人格注入 + 私密教学脚本 + 参考解对照 + Socratic 引导**
+
+课件内容全部是**本地文件**，老师只需「建文件夹 + 填文件」即可加一门课，零部署、零外部服务。
+
+---
+
+## 架构（三层）
+
+| 层 | 位置 | 作用 |
+|:--|:--|:--|
+| 命令层 | `commands/*.md` | 斜杠命令，编排 LLM 怎么当 Mentor |
+| MCP 层 | `server/server.js` | Node + `@modelcontextprotocol/sdk`，把课件暴露成工具给 LLM |
+| 内容层 | `labs/` | 课件（本地文件，老师在这里加） |
+
+```
+hi-agent-lab/
+├── persona.md                 # 全局 Mentor 人格（写一次，所有 lab 共用）
+├── .claude-plugin/plugin.json # 插件清单
+├── .mcp.json                  # 挂 MCP server
+├── commands/                  # 斜杠命令
+├── server/                    # MCP server（node + 官方 SDK）
+│   ├── server.js
+│   └── lib/{paths,labs,check}.js
+├── labs/                      # ★ 课件区 —— 老师在这里加 lab
+└── reviews/                   # (运行时生成) 提交的 review
+```
+
+**核心机制一句话**：`start_lab` 把 `persona.md` + 该 lab 的 `teaching.md` + `reference.md` 拼成一段
+「SYSTEM OPERATING INSTRUCTIONS」注入给 LLM，命令它静默内化、不泄参考解、用 Socratic 引导学员。
+学员成果由 `check_learner_output` 对照参考解做本地启发式判断。
+
+---
+
+## 安装
+
+### 方式一：本地快速跑通（推荐先这样试）
+
+1. 装依赖：
+   ```bash
+   cd hi-agent-lab/server && npm install
+   ```
+2. 注册 MCP server（把 `<插件根>` 换成本目录绝对路径）：
+   ```bash
+   claude mcp add hi-agent-lab -- node "<插件根>/server/server.js" "<插件根>"
+   ```
+3. 把命令放进 `~/.claude/commands/`（文件名即命令名）：
+   ```
+   commands/hi-agent.md         -> ~/.claude/commands/hi-agent.md
+   commands/hi-agent-start.md   -> ~/.claude/commands/hi-agent-start.md
+   commands/hi-agent-status.md  -> ~/.claude/commands/hi-agent-status.md
+   commands/hi-agent-review.md  -> ~/.claude/commands/hi-agent-review.md
+   commands/hi-agent-help.md    -> ~/.claude/commands/hi-agent-help.md
+   ```
+4. 重启 Claude Code，输入 `/hi-agent` 即可看到 lab 列表并开始。
+
+### 方式二：作为插件 / marketplace 分发给学生
+
+把 `hi-agent-lab/` 放进一个 git 仓库，在它的**上一级**放一份 marketplace 清单
+`.claude-plugin/marketplace.json`（已提供模板，`source` 指向 `./hi-agent-lab`）。
+学生先 `claude plugin marketplace add <那个上一级目录>`，再 `claude plugin install hi-agent-lab` 即可。
+（`.mcp.json` 里的 `${CLAUDE_PLUGIN_ROOT}` 会自动解析到插件安装位置。）
+
+---
+
+## ★ 如何添加一门课（lab）
+
+**加一个 lab = 建一个文件夹 + 填 3 个文件**（第 4 个可选）。
+
+### 1. 建文件夹
+```
+labs/
+└── lab-02-build-tool/     # 文件夹名即 lab id（建议 lab-NN-小写短横线）
+    ├── meta.json          # 必填：目录信息
+    ├── teaching.md        # 必填：Mentor 私密教学脚本
+    ├── reference.md       # 必填：参考解
+    └── kb.md              # 可选：知识点清单
+```
+
+### 2. `meta.json`（必填，显示在 `/hi-agent` 列表里）
+```json
+{
+  "id": "lab-02-build-tool",
+  "title": "给 agent 装一个工具",
+  "stage": 2,
+  "duration": "2–3h",
+  "summary": "一句话简介，出现在 /hi-agent 的列表卡片里"
+}
+```
+
+### 3. `teaching.md`（必填，Mentor 私密教学脚本）
+`start_lab` 会把整段注入给 LLM。内容 = 给「AI 导师」的提示词，约定三段：
+- **目标 / 阶段 checkpoint**：这个 lab 分几步、每步完成标准。
+- **引导策略**：每步怎么带（离散选择给选项卡、开放理解必须让学员打字）。
+- **常见坑位 + 收尾 rubric**：学员会卡在哪、怎么判「做完」。
+
+参考 `labs/lab-01-attention/teaching.md` 的写法。
+
+### 4. `reference.md`（必填，参考解）
+学员成果要对照的参考答案。想让 `check_learner_output` 更准，就在文件里加一节：
+
+```markdown
+## 必查标记
+- 关键点一（用一句短话描述，越具体越好）
+- 关键点二
+```
+
+`check_learner_output` 会抽出这些 `- 标记`，逐条和学员产物做 token 重叠判断，返回
+`on-track / partial / off-track` + 缺了哪些点的 Socratic 提示。没有这节时退化为整体相似度判断。
+
+### 5. `kb.md`（可选）
+这个 lab 覆盖的知识点清单，`/hi-agent-status`、`/hi-agent-review` 时给学员对照。
+
+### 6. `persona.md`（全局，写一次）
+Mentor 的通用人格（语气、禁忌、`📚 [Lab ...]` 结尾格式）。所有 lab 共用，一般不用动。
+
+---
+
+## 常用命令
+
+| 命令 | 作用 |
+|:--|:--|
+| `/hi-agent` | 主入口：列 lab + 进度 → 选一个开始 |
+| `/hi-agent-start [lab_id]` | 开始一个 lab |
+| `/hi-agent-status` | 当前进度 |
+| `/hi-agent-review` | 提交 review（反思 + 代码快照 → `reviews/`） |
+| `/hi-agent-help` | 命令清单 |
+
+---
+
+## 局限 & 升级指引（当前刻意简化）
+
+1. **参考解不保密**：本地文件就在学员机器上，学员能直接翻到 `reference.md`。
+   → 想真正「held-out」：把 `reference.md`（和 `check_learner_output` 的比对逻辑）挪到一个服务端，
+   MCP server 改成 HTTP 调它，让 `check_learner_output` 在**服务端**和参考解比对，
+   答案永不下发。
+2. **review 落到本地文件**而非发给真人。想自动批改/邮件，把 `submit_review` 的后半段换成推给后端或 SMTP。
+3. **无 OTP 登录 / 无账号体系**。多人场景需要后端加身份。
+4. **检查是启发式**（token 重叠），只做教学参考，不是真验收。真机验收请用服务端 held-out 打分器。
+
+把这几处替换掉，就能一步步长成真正的服务端验证版。

@@ -1,0 +1,11 @@
+{
+  "name": "hi-agent-lab-server",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "description": "Hi-agent Lab 的 MCP server —— 读本地 labs/ 课件，暴露给 Claude Code",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.8"
+  }
+}
