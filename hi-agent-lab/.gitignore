@@ -2,3 +2,4 @@ node_modules/
 .session.json
 reviews/
 .env
+submission.json

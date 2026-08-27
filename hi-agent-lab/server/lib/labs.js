@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { LABS_DIR, REVIEWS_DIR, SESSION_FILE, PERSONA_FILE } from "./paths.js";
+import { LABS_DIR, REVIEWS_DIR, SESSION_FILE, PERSONA_FILE, SUBMISSION_FILE } from "./paths.js";
 
 async function readIfExists(p) {
   try {
@@ -106,7 +106,47 @@ export async function getStatus() {
   }
 }
 
-/** 把 review 追加写到 reviews/<lab-id>.md。 */
+/** 读 submission.json（飞书 webhook 等提交配置）。不存在/损坏返回 null。 */
+async function readSubmissionConfig() {
+  const raw = await readIfExists(SUBMISSION_FILE);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function truncate(s, n) {
+  if (!s || s.length <= n) return s;
+  return s.slice(0, n) + "\n…（已截断，完整见学生本地 reviews/）";
+}
+
+/** 推送反思+代码到飞书群机器人 webhook。返回飞书接口的原始结果。 */
+async function sendToFeishu(webhookUrl, keyword, labId, reflections, codeSnapshot) {
+  const kw = keyword || "review";
+  const text = [
+    `📚 Hi-agent Lab ${kw}`,
+    `Lab: ${labId}`,
+    "",
+    "【反思】",
+    reflections,
+    "",
+    "【代码快照】",
+    truncate(codeSnapshot, 6000),
+  ].join("\n");
+
+  const res = await fetch(webhookUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ msg_type: "text", content: { text } }),
+  });
+  const body = await res.json().catch(() => ({}));
+  const ok = res.ok && (body.code === 0 || body.StatusCode === 0);
+  return { ok, http_status: res.status, body };
+}
+
+/** 把 review 追加写到 reviews/<lab-id>.md，并按需推送到飞书。 */
 export async function submitReview(labId, reflections, codeSnapshot) {
   assertSafeLabId(labId);
   await fs.mkdir(REVIEWS_DIR, { recursive: true });
@@ -128,5 +168,24 @@ export async function submitReview(labId, reflections, codeSnapshot) {
     "",
   ].join("\n");
   await fs.appendFile(file, block, "utf8");
-  return { ok: true, saved_to: file };
+
+  // 新增：推送到飞书（若配置了 submission.json）
+  const cfg = await readSubmissionConfig();
+  let feishu = { configured: false };
+  if (cfg && typeof cfg.feishu_webhook === "string" && cfg.feishu_webhook) {
+    try {
+      const r = await sendToFeishu(
+        cfg.feishu_webhook,
+        cfg.feishu_keyword,
+        labId,
+        reflections,
+        codeSnapshot
+      );
+      feishu = { configured: true, ...r };
+    } catch (e) {
+      feishu = { configured: true, ok: false, error: String(e) };
+    }
+  }
+
+  return { ok: true, saved_to: file, feishu };
 }

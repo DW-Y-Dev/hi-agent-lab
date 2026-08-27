@@ -11,3 +11,5 @@ export const LABS_DIR = path.join(pluginRoot, "labs");
 export const REVIEWS_DIR = path.join(pluginRoot, "reviews");
 export const SESSION_FILE = path.join(pluginRoot, ".session.json");
 export const PERSONA_FILE = path.join(pluginRoot, "persona.md");
+// 提交配置：feishu_webhook 等，gitignore 掉，不进公开仓库
+export const SUBMISSION_FILE = path.join(pluginRoot, "submission.json");

@@ -21433,6 +21433,7 @@ var LABS_DIR = path.join(pluginRoot, "labs");
 var REVIEWS_DIR = path.join(pluginRoot, "reviews");
 var SESSION_FILE = path.join(pluginRoot, ".session.json");
 var PERSONA_FILE = path.join(pluginRoot, "persona.md");
+var SUBMISSION_FILE = path.join(pluginRoot, "submission.json");
 
 // lib/labs.js
 async function readIfExists(p) {
@@ -21525,6 +21526,40 @@ async function getStatus() {
     return { active: false };
   }
 }
+async function readSubmissionConfig() {
+  const raw = await readIfExists(SUBMISSION_FILE);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+function truncate(s, n) {
+  if (!s || s.length <= n) return s;
+  return s.slice(0, n) + "\n\u2026\uFF08\u5DF2\u622A\u65AD\uFF0C\u5B8C\u6574\u89C1\u5B66\u751F\u672C\u5730 reviews/\uFF09";
+}
+async function sendToFeishu(webhookUrl, keyword, labId, reflections, codeSnapshot) {
+  const kw = keyword || "review";
+  const text = [
+    `\u{1F4DA} Hi-agent Lab ${kw}`,
+    `Lab: ${labId}`,
+    "",
+    "\u3010\u53CD\u601D\u3011",
+    reflections,
+    "",
+    "\u3010\u4EE3\u7801\u5FEB\u7167\u3011",
+    truncate(codeSnapshot, 6e3)
+  ].join("\n");
+  const res = await fetch(webhookUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ msg_type: "text", content: { text } })
+  });
+  const body = await res.json().catch(() => ({}));
+  const ok = res.ok && (body.code === 0 || body.StatusCode === 0);
+  return { ok, http_status: res.status, body };
+}
 async function submitReview(labId, reflections, codeSnapshot) {
   assertSafeLabId(labId);
   await fs.mkdir(REVIEWS_DIR, { recursive: true });
@@ -21546,7 +21581,23 @@ async function submitReview(labId, reflections, codeSnapshot) {
     ""
   ].join("\n");
   await fs.appendFile(file, block, "utf8");
-  return { ok: true, saved_to: file };
+  const cfg = await readSubmissionConfig();
+  let feishu = { configured: false };
+  if (cfg && typeof cfg.feishu_webhook === "string" && cfg.feishu_webhook) {
+    try {
+      const r = await sendToFeishu(
+        cfg.feishu_webhook,
+        cfg.feishu_keyword,
+        labId,
+        reflections,
+        codeSnapshot
+      );
+      feishu = { configured: true, ...r };
+    } catch (e) {
+      feishu = { configured: true, ok: false, error: String(e) };
+    }
+  }
+  return { ok: true, saved_to: file, feishu };
 }
 
 // lib/check.js
