@@ -1,7 +1,0 @@
-{
-  "id": "lab-01-attention",
-  "title": "理解注意力机制的原理",
-  "stage": 1,
-  "duration": "2–3h",
-  "summary": "从「查字典/检索」的直觉出发，手写 scaled dot-product attention，搞懂 Q/K/V、softmax 权重与加权求和。"
-}

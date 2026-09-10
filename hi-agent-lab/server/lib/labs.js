@@ -10,9 +10,9 @@ async function readIfExists(p) {
   }
 }
 
-/** labId 只允许小写字母/数字/短横线，堵住 path.join 的目录穿越。 */
+/** labId 只允许小写字母/数字/短横线/下划线，堵住 path.join 的目录穿越。 */
 function assertSafeLabId(labId) {
-  if (typeof labId !== "string" || !/^[a-z0-9][a-z0-9-]*$/.test(labId)) {
+  if (typeof labId !== "string" || !/^[a-z0-9][a-z0-9_-]*$/.test(labId)) {
     throw new Error(`非法的 lab id：${labId}`);
   }
 }

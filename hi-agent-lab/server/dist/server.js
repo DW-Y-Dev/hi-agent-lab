@@ -21444,7 +21444,7 @@ async function readIfExists(p) {
   }
 }
 function assertSafeLabId(labId) {
-  if (typeof labId !== "string" || !/^[a-z0-9][a-z0-9-]*$/.test(labId)) {
+  if (typeof labId !== "string" || !/^[a-z0-9][a-z0-9_-]*$/.test(labId)) {
     throw new Error(`\u975E\u6CD5\u7684 lab id\uFF1A${labId}`);
   }
 }

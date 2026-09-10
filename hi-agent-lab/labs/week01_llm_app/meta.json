@@ -1,0 +1,7 @@
+{
+  "id": "week01_llm_app",
+  "title": "工程故障分析助手",
+  "stage": 1,
+  "duration": "2–3h",
+  "summary": "用 Claude API + Pydantic 结构化输出，把非结构化故障日志转成 typed FaultReport，并做鲁棒性压测（不完整 / 矛盾 / 歧义 / 畸形输入）。"
+}

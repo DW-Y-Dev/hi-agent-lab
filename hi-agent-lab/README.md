@@ -108,7 +108,7 @@ labs/
 - **引导策略**：每步怎么带（离散选择给选项卡、开放理解必须让学员打字）。
 - **常见坑位 + 收尾 rubric**：学员会卡在哪、怎么判「做完」。
 
-参考 `labs/lab-01-attention/teaching.md` 的写法。
+参考 `labs/week01_llm_app/teaching.md` 的写法。
 
 ### 4. `reference.md`（必填，参考解）
 学员成果要对照的参考答案。想让 `check_learner_output` 更准，就在文件里加一节：
