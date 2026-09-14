@@ -19,6 +19,15 @@ claude plugin install hi-agent-lab
 /hi-agent
 ```
 
+## 课件更新（已安装的同学）
+
+老师发布新课件后，**不要重跑 `install`**——已安装时它会直接跳过、不会拉新版本。用：
+
+```bash
+# 升级到最新版，然后重启 Claude Code 生效
+claude plugin update hi-agent-lab
+```
+
 ## 仓库结构
 
 ```
