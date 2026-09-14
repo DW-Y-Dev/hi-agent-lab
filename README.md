@@ -33,15 +33,4 @@ claude plugin install hi-agent-lab
 
 ## 给老师：如何加一门课
 
-**加一个 lab = 在 `hi-agent-lab/labs/` 下建文件夹 + 填 3 个文件**（`meta.json` / `teaching.md` / `reference.md`，`kb.md` 可选）：
-
-```
-labs/
-└── lab-02-build-tool/
-    ├── meta.json          # 必填：目录信息（id / title / stage / duration / summary）
-    ├── teaching.md        # 必填：Mentor 私密教学脚本
-    ├── reference.md       # 必填：参考解（check_learner_output 对照它判断进度）
-    └── kb.md              # 可选：知识点清单
-```
-
-完整机制与命令说明见 [`hi-agent-lab/README.md`](hi-agent-lab/README.md)。
+**加一个 lab = 在 `hi-agent-lab/labs/` 下建文件夹 + 填 3 个文件**（`meta.json` / `teaching.md` / `reference.md`，`kb.md` 可选）。各文件的写法、示例与完整机制见 [`hi-agent-lab/README.md`](hi-agent-lab/README.md)（唯一维护处，本文件不再重复）。

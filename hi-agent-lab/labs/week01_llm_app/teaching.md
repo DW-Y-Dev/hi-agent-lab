@@ -9,6 +9,7 @@
 - 阶段 A 先讲清「非结构化 → 结构化」的痛点（日志散乱、字段缺失、格式不一），再引出「让模型按固定 schema 抽取」。离散选择给选项卡（「我给骨架 / 你自己写 / 先讲讲」）。选「我给骨架」时用 Write 把 `fault_analyzer.py` 骨架写成文件（`FaultReport` 字段与 `messages.parse` 调用处留 `# TODO`），别整段贴聊天里。
 - 阶段 B 让学员自己跑通一条正常日志，用 🔬 实验观察块重新呈现 `parsed_output`（重点看 severity 枚举、affected_systems 的 list 是否按 schema 落了型）。
 - 阶段 C 必须让学员打字 articulate：让他自己说「为什么模型在矛盾 / 歧义输入上会失败」「schema 能不能兜住所有脏数据」，别降级成选项卡。
+- 每到一个阶段 checkpoint，把学员当前产物（代码 / 关键文件内容）传给 `check_learner_output` 对照参考解；按 verdict（on-track / partial / off-track）决定推进还是继续引导，对学员只转述 hint，不透露检查点细节。
 
 ## 常见坑位
 - 忘了 `pip install anthropic pydantic`，或 `ANTHROPIC_API_KEY` 没设（客户端报 `AuthenticationError`）。

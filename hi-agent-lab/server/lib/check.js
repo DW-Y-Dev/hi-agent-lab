@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { LABS_DIR } from "./paths.js";
+import { LABS_DIR, assertSafeLabId } from "./paths.js";
 
 // 极简停用词，够 demo 用（仅英文；中文走 bigram，天然不在停用词里）
 const STOP = new Set(
@@ -61,6 +61,7 @@ function extractMarkers(reference) {
 
 /** 本地对照参考解，判断学员成果是否 on track。不泄参考解。 */
 export async function checkOutput(labId, artifact) {
+  assertSafeLabId(labId);
   const refPath = path.join(LABS_DIR, labId, "reference.md");
   let reference;
   try {
@@ -85,7 +86,8 @@ export async function checkOutput(labId, artifact) {
   // 相似度只对 reference 正文（去代码块）算，避免代码词稀释
   const refTokens = [...new Set(tokenize(stripCodeFences(reference)))];
   const inter = refTokens.filter((t) => artSet.has(t)).length;
-  const union = new Set([...refTokens, ...artTokens]).size;
+  // 两侧都已去重，用容斥公式算并集，省掉物化一个大 Set
+  const union = refTokens.length + artSet.size - inter;
   const similarity = union ? inter / union : 0;
 
   let verdict;

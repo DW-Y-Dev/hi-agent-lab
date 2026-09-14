@@ -2,8 +2,7 @@
   "name": "hi-agent-lab-marketplace",
   "description": "教学插件市场（demo）—— 把 Hi-agent Lab 分发给学生的市场清单。放本插件上一级目录用。",
   "owner": {
-    "name": "Your Name",
-    "email": "you@example.com"
+    "name": "DW-Y-Dev"
   },
   "plugins": [
     {

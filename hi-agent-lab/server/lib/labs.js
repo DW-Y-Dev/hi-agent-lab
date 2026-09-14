@@ -1,19 +1,21 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { LABS_DIR, REVIEWS_DIR, SESSION_FILE, PERSONA_FILE, SUBMISSION_FILE } from "./paths.js";
+import {
+  LABS_DIR,
+  REVIEWS_DIR,
+  SESSION_FILE,
+  PERSONA_FILE,
+  SUBMISSION_FILE,
+  assertSafeLabId,
+} from "./paths.js";
 
+/** 只把「文件不存在」当成缺文件；权限等其他错误如实抛出，不静默吞掉。 */
 async function readIfExists(p) {
   try {
     return await fs.readFile(p, "utf8");
-  } catch {
-    return null;
-  }
-}
-
-/** labId 只允许小写字母/数字/短横线/下划线，堵住 path.join 的目录穿越。 */
-function assertSafeLabId(labId) {
-  if (typeof labId !== "string" || !/^[a-z0-9][a-z0-9_-]*$/.test(labId)) {
-    throw new Error(`非法的 lab id：${labId}`);
+  } catch (e) {
+    if (e.code === "ENOENT") return null;
+    throw e;
   }
 }
 
@@ -56,7 +58,12 @@ export async function startLab(labId) {
   if (!metaRaw) {
     throw new Error(`lab 不存在：${labId}（请在 labs/${labId}/ 下建 meta.json）`);
   }
-  const meta = JSON.parse(metaRaw);
+  let meta;
+  try {
+    meta = JSON.parse(metaRaw);
+  } catch {
+    throw new Error(`labs/${labId}/meta.json 不是合法 JSON，请老师修复后重试`);
+  }
 
   const persona = (await readIfExists(PERSONA_FILE)) || "";
   const teaching = (await readIfExists(path.join(dir, "teaching.md"))) || "（无教学脚本）";
@@ -89,6 +96,12 @@ export async function startLab(labId) {
     "",
     "## 4. 参考解（私密 —— 仅供你判断学员进度）",
     reference,
+    "",
+    "## 5. 阶段检查（务必执行）",
+    "每到 teaching.md 的一个阶段 checkpoint（或学员自认完成一步时），把学员当前产物",
+    "（代码 / 关键文件内容）作为 artifact 调用工具 `check_learner_output`（lab_id 用本 lab id）。",
+    "按返回的 verdict（on-track / partial / off-track）决定推进还是继续引导；",
+    "对学员只转述 hint，不透露 checkpoints 的具体内容。",
     "",
     "---",
     "[NOW DO THIS] 以 Mentor 身份、简短可扫读地问候学员，说明本 lab 目标，并给出第一步引导。不要贴参考解。",

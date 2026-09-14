@@ -70,10 +70,11 @@ hi-agent-lab/
 改了 `server/*.js` 后，重新生成自包含的 `server/dist/server.js`：
 
 ```bash
-cd server && npx --yes esbuild server.js --bundle --platform=node --format=esm --outfile=dist/server.js
+cd server && npm run build
 ```
 
-（`npx` 会临时拉 esbuild，无需常驻安装到项目里。）
+（即 `npx --yes esbuild server.js --bundle --platform=node --format=esm --outfile=dist/server.js`，
+`npx` 会临时拉 esbuild，无需常驻安装到项目里。）
 
 ---
 
@@ -123,7 +124,7 @@ labs/
 `on-track / partial / off-track` + 缺了哪些点的 Socratic 提示。没有这节时退化为整体相似度判断。
 
 ### 5. `kb.md`（可选）
-这个 lab 覆盖的知识点清单，`/hi-agent-status`、`/hi-agent-review` 时给学员对照。
+这个 lab 覆盖的知识点清单，`start_lab` 时随教学脚本一起注入给 Mentor 作引导参考。
 
 ### 6. `persona.md`（全局，写一次）
 Mentor 的通用人格（语气、禁忌、`📚 [Lab ...]` 结尾格式）。所有 lab 共用，一般不用动。
@@ -134,7 +135,7 @@ Mentor 的通用人格（语气、禁忌、`📚 [Lab ...]` 结尾格式）。�
 
 | 命令 | 作用 |
 |:--|:--|
-| `/hi-agent` | 主入口：列 lab + 进度 → 选一个开始 |
+| `/hi-agent` | 主入口：列 lab + 进度 → 开始或继续 |
 | `/hi-agent-start [lab_id]` | 开始一个 lab |
 | `/hi-agent-status` | 当前进度 |
 | `/hi-agent-review` | 提交 review（反思 + 代码快照 → `reviews/`） |

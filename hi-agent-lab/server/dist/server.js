@@ -21434,18 +21434,19 @@ var REVIEWS_DIR = path.join(pluginRoot, "reviews");
 var SESSION_FILE = path.join(pluginRoot, ".session.json");
 var PERSONA_FILE = path.join(pluginRoot, "persona.md");
 var SUBMISSION_FILE = path.join(pluginRoot, "submission.json");
+function assertSafeLabId(labId) {
+  if (typeof labId !== "string" || !/^[a-z0-9][a-z0-9_-]*$/.test(labId)) {
+    throw new Error(`\u975E\u6CD5\u7684 lab id\uFF1A${labId}`);
+  }
+}
 
 // lib/labs.js
 async function readIfExists(p) {
   try {
     return await fs.readFile(p, "utf8");
-  } catch {
-    return null;
-  }
-}
-function assertSafeLabId(labId) {
-  if (typeof labId !== "string" || !/^[a-z0-9][a-z0-9_-]*$/.test(labId)) {
-    throw new Error(`\u975E\u6CD5\u7684 lab id\uFF1A${labId}`);
+  } catch (e) {
+    if (e.code === "ENOENT") return null;
+    throw e;
   }
 }
 async function listLabs() {
@@ -21482,7 +21483,12 @@ async function startLab(labId) {
   if (!metaRaw) {
     throw new Error(`lab \u4E0D\u5B58\u5728\uFF1A${labId}\uFF08\u8BF7\u5728 labs/${labId}/ \u4E0B\u5EFA meta.json\uFF09`);
   }
-  const meta = JSON.parse(metaRaw);
+  let meta;
+  try {
+    meta = JSON.parse(metaRaw);
+  } catch {
+    throw new Error(`labs/${labId}/meta.json \u4E0D\u662F\u5408\u6CD5 JSON\uFF0C\u8BF7\u8001\u5E08\u4FEE\u590D\u540E\u91CD\u8BD5`);
+  }
   const persona = await readIfExists(PERSONA_FILE) || "";
   const teaching = await readIfExists(path2.join(dir, "teaching.md")) || "\uFF08\u65E0\u6559\u5B66\u811A\u672C\uFF09";
   const reference = await readIfExists(path2.join(dir, "reference.md")) || "\uFF08\u65E0\u53C2\u8003\u89E3\uFF09";
@@ -21512,6 +21518,12 @@ async function startLab(labId) {
     "",
     "## 4. \u53C2\u8003\u89E3\uFF08\u79C1\u5BC6 \u2014\u2014 \u4EC5\u4F9B\u4F60\u5224\u65AD\u5B66\u5458\u8FDB\u5EA6\uFF09",
     reference,
+    "",
+    "## 5. \u9636\u6BB5\u68C0\u67E5\uFF08\u52A1\u5FC5\u6267\u884C\uFF09",
+    "\u6BCF\u5230 teaching.md \u7684\u4E00\u4E2A\u9636\u6BB5 checkpoint\uFF08\u6216\u5B66\u5458\u81EA\u8BA4\u5B8C\u6210\u4E00\u6B65\u65F6\uFF09\uFF0C\u628A\u5B66\u5458\u5F53\u524D\u4EA7\u7269",
+    "\uFF08\u4EE3\u7801 / \u5173\u952E\u6587\u4EF6\u5185\u5BB9\uFF09\u4F5C\u4E3A artifact \u8C03\u7528\u5DE5\u5177 `check_learner_output`\uFF08lab_id \u7528\u672C lab id\uFF09\u3002",
+    "\u6309\u8FD4\u56DE\u7684 verdict\uFF08on-track / partial / off-track\uFF09\u51B3\u5B9A\u63A8\u8FDB\u8FD8\u662F\u7EE7\u7EED\u5F15\u5BFC\uFF1B",
+    "\u5BF9\u5B66\u5458\u53EA\u8F6C\u8FF0 hint\uFF0C\u4E0D\u900F\u9732 checkpoints \u7684\u5177\u4F53\u5185\u5BB9\u3002",
     "",
     "---",
     "[NOW DO THIS] \u4EE5 Mentor \u8EAB\u4EFD\u3001\u7B80\u77ED\u53EF\u626B\u8BFB\u5730\u95EE\u5019\u5B66\u5458\uFF0C\u8BF4\u660E\u672C lab \u76EE\u6807\uFF0C\u5E76\u7ED9\u51FA\u7B2C\u4E00\u6B65\u5F15\u5BFC\u3002\u4E0D\u8981\u8D34\u53C2\u8003\u89E3\u3002"
@@ -21646,6 +21658,7 @@ function extractMarkers(reference) {
   return markers;
 }
 async function checkOutput(labId, artifact) {
+  assertSafeLabId(labId);
   const refPath = path3.join(LABS_DIR, labId, "reference.md");
   let reference;
   try {
@@ -21666,7 +21679,7 @@ async function checkOutput(labId, artifact) {
   }
   const refTokens = [...new Set(tokenize(stripCodeFences(reference)))];
   const inter = refTokens.filter((t) => artSet.has(t)).length;
-  const union2 = (/* @__PURE__ */ new Set([...refTokens, ...artTokens])).size;
+  const union2 = refTokens.length + artSet.size - inter;
   const similarity = union2 ? inter / union2 : 0;
   let verdict;
   if (markers.length === 0) {
@@ -21685,10 +21698,12 @@ async function checkOutput(labId, artifact) {
 }
 
 // server.js
-var server = new McpServer({ name: "hi-agent-lab", version: "0.1.0" });
-var json = (fn) => async (...args) => ({
-  content: [{ type: "text", text: JSON.stringify(await fn(...args), null, 2) }]
-});
+var server = new McpServer({ name: "hi-agent-lab", version: "0.1.1" });
+var json = (fn) => async (...args) => {
+  const result = await fn(...args);
+  const text = typeof result === "string" ? result : JSON.stringify(result);
+  return { content: [{ type: "text", text }] };
+};
 server.registerTool(
   "list_labs",
   { description: "\u5217\u51FA\u6240\u6709\u53EF\u7528 lab\uFF08\u8BFB\u672C\u5730 labs/*/meta.json\uFF09" },
