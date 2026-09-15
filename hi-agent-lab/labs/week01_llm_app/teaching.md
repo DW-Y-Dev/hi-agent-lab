@@ -4,12 +4,13 @@
 
 ## 第一部分：基础知识点与术语（先讲，后问）
 
+**本课任务**：把一条故障日志自动抽成带类型的 `FaultReport`。开场问候先把任务交代给学员，再进入 1.1 讲痛点——学员带着目标听后面的小节。
+
 逐小节讲给学员：每小节用讲义形式重新呈现（标题 + 3–5 句 + 一个小例子），不要整段照贴本文件。术语首次出现时附英文原文。
 
 ### 1.1 非结构化 → 结构化
 - 日志、工单这类文本是给人看的：字段散在句子里，机器没法直接取。
 - 结构化（structured）数据 = 有固定 schema 的数据：每个字段有名字、有类型。
-- 本课任务：把一条故障日志自动抽成带类型的 `FaultReport`。
 
 ### 1.2 LLM 结构化输出（Structured Output）
 - 让模型回复被约束到固定 schema，而不是自由文本。
@@ -21,7 +22,7 @@
 - 可选字段 `str | None = None`：日志里可能缺失的字段，缺失时是 `None` 而非报错。
 - `Field(default_factory=list)`：可变默认值必须给工厂函数，避免多个实例共享同一个 list。
 
-### 1.4 鲁棒性压测的四类脏输入
+### 1.4 脏输入的四种类型
 - incomplete（信息不全）/ contradictory（自相矛盾）/ ambiguous（含糊指代）/ malformed（格式畸形）。
 - 记住：schema 再明确也不等于零失败，脏输入仍可能让抽取出错。
 
@@ -84,14 +85,10 @@ print(analyze_log(log).model_dump())
 
 同样把回答作为 artifact 调 `check_learner_output` 做最终对照。
 
-## （可选）课后动手：鲁棒性压测
-学有余力：构造 incomplete / contradictory / ambiguous / malformed 四类输入跑 `analyze_log`，把「输入 → 期望 → 实际 → 失败原因」记到 `failure_log.md`（样本见参考解的压测样例一节）。这个环节只给方向和骨架，不替学员写好。
-
 ## 常见坑位
 - 忘了 `pip install anthropic pydantic`，或 `ANTHROPIC_API_KEY` 没设（`AuthenticationError`）。
 - 把可选字段写成 `str`：缺失时 Pydantic 直接抛 `ValidationError`，而不是返回 `None`。
 - `affected_systems: list[str] = []`：可变默认值会被所有实例共享，必须 `default_factory`。
-- 压测只跑正常输入，没覆盖四类脏输入。
 
 ## 收尾 rubric
 两部分检测问题都能答上（答错处已纠正）即算完成；学员能解释「为什么 schema 明确仍会失败、怎么兜底」为加分。
