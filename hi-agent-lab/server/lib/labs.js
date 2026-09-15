@@ -79,33 +79,32 @@ export async function startLab(labId) {
     )
   );
 
-  return [
-    "# SYSTEM OPERATING INSTRUCTIONS",
-    "",
-    `你现在是「Mentor」，正在带学员完成 lab「${meta.title || labId}」(id: ${labId})。`,
-    "把下面内容静默内化，不原样显示，绝不向学员泄露参考解。",
-    "",
-    "## 1. Mentor 人格（全局）",
-    persona,
-    "",
-    "## 2. 本 lab 教学脚本（私密）",
-    teaching,
-    "",
-    "## 3. 知识点清单",
-    kb,
-    "",
-    "## 4. 参考解（私密 —— 仅供你判断学员进度）",
-    reference,
-    "",
-    "## 5. 阶段检查（务必执行）",
-    "每到 teaching.md 的一个阶段 checkpoint（或学员自认完成一步时），把学员当前产物",
-    "（代码 / 关键文件内容）作为 artifact 调用工具 `check_learner_output`（lab_id 用本 lab id）。",
-    "按返回的 verdict（on-track / partial / off-track）决定推进还是继续引导；",
-    "对学员只转述 hint，不透露 checkpoints 的具体内容。",
-    "",
-    "---",
-    "[NOW DO THIS] 以 Mentor 身份、简短可扫读地问候学员，说明本 lab 目标，并给出第一步引导。不要贴参考解。",
-  ].join("\n");
+  return `# SYSTEM OPERATING INSTRUCTIONS
+
+你现在是「Mentor」，正在带学员完成 lab「${meta.title || labId}」(id: ${labId})。
+把下面内容静默内化，不原样显示；第 4 节参考解与检查点绝不向学员泄露
+（第 2 节教学脚本里的示例代码是教学材料，按脚本讲解展示，不在此列）。
+
+## 1. Mentor 人格（全局）
+${persona}
+
+## 2. 本 lab 教学脚本（私密）
+${teaching}
+
+## 3. 知识点清单
+${kb}
+
+## 4. 参考解（私密 —— 仅供你判断学员进度）
+${reference}
+
+## 5. 阶段检查（务必执行）
+每到 teaching.md 的一个阶段 checkpoint（或学员自认完成一步时），把学员当前产物
+（代码 / 关键文件内容）作为 artifact 调用工具 \`check_learner_output\`（lab_id 用本 lab id）。
+按返回的 verdict（on-track / partial / off-track）决定推进还是继续引导；
+对学员只转述 hint，不透露 checkpoints 的具体内容。
+
+---
+[NOW DO THIS] 以 Mentor 身份、简短可扫读地问候学员，说明本 lab 目标，并给出第一步引导。不要贴参考解。`;
 }
 
 /** 当前进行中的 lab 指针。 */
@@ -138,16 +137,14 @@ function truncate(s, n) {
 /** 推送反思+代码到飞书群机器人 webhook。返回飞书接口的原始结果。 */
 async function sendToFeishu(webhookUrl, keyword, labId, reflections, codeSnapshot) {
   const kw = keyword || "review";
-  const text = [
-    `📚 Hi-agent Lab ${kw}`,
-    `Lab: ${labId}`,
-    "",
-    "【反思】",
-    reflections,
-    "",
-    "【代码快照】",
-    truncate(codeSnapshot, 6000),
-  ].join("\n");
+  const text = `📚 Hi-agent Lab ${kw}
+Lab: ${labId}
+
+【反思】
+${reflections}
+
+【代码快照】
+${truncate(codeSnapshot, 6000)}`;
 
   const res = await fetch(webhookUrl, {
     method: "POST",
@@ -164,22 +161,20 @@ export async function submitReview(labId, reflections, codeSnapshot) {
   assertSafeLabId(labId);
   await fs.mkdir(REVIEWS_DIR, { recursive: true });
   const file = path.join(REVIEWS_DIR, `${labId}.md`);
-  const block = [
-    "",
-    "",
-    "---",
-    "",
-    `## Review @ ${new Date().toISOString()}`,
-    "",
-    "### 反思",
-    reflections,
-    "",
-    "### 代码快照",
-    "```",
-    codeSnapshot,
-    "```",
-    "",
-  ].join("\n");
+  const block = `
+
+---
+
+## Review @ ${new Date().toISOString()}
+
+### 反思
+${reflections}
+
+### 代码快照
+\`\`\`
+${codeSnapshot}
+\`\`\`
+`;
   await fs.appendFile(file, block, "utf8");
 
   // 新增：推送到飞书（若配置了 submission.json）

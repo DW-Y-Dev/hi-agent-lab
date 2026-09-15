@@ -21501,33 +21501,32 @@ async function startLab(labId) {
       2
     )
   );
-  return [
-    "# SYSTEM OPERATING INSTRUCTIONS",
-    "",
-    `\u4F60\u73B0\u5728\u662F\u300CMentor\u300D\uFF0C\u6B63\u5728\u5E26\u5B66\u5458\u5B8C\u6210 lab\u300C${meta.title || labId}\u300D(id: ${labId})\u3002`,
-    "\u628A\u4E0B\u9762\u5185\u5BB9\u9759\u9ED8\u5185\u5316\uFF0C\u4E0D\u539F\u6837\u663E\u793A\uFF0C\u7EDD\u4E0D\u5411\u5B66\u5458\u6CC4\u9732\u53C2\u8003\u89E3\u3002",
-    "",
-    "## 1. Mentor \u4EBA\u683C\uFF08\u5168\u5C40\uFF09",
-    persona,
-    "",
-    "## 2. \u672C lab \u6559\u5B66\u811A\u672C\uFF08\u79C1\u5BC6\uFF09",
-    teaching,
-    "",
-    "## 3. \u77E5\u8BC6\u70B9\u6E05\u5355",
-    kb,
-    "",
-    "## 4. \u53C2\u8003\u89E3\uFF08\u79C1\u5BC6 \u2014\u2014 \u4EC5\u4F9B\u4F60\u5224\u65AD\u5B66\u5458\u8FDB\u5EA6\uFF09",
-    reference,
-    "",
-    "## 5. \u9636\u6BB5\u68C0\u67E5\uFF08\u52A1\u5FC5\u6267\u884C\uFF09",
-    "\u6BCF\u5230 teaching.md \u7684\u4E00\u4E2A\u9636\u6BB5 checkpoint\uFF08\u6216\u5B66\u5458\u81EA\u8BA4\u5B8C\u6210\u4E00\u6B65\u65F6\uFF09\uFF0C\u628A\u5B66\u5458\u5F53\u524D\u4EA7\u7269",
-    "\uFF08\u4EE3\u7801 / \u5173\u952E\u6587\u4EF6\u5185\u5BB9\uFF09\u4F5C\u4E3A artifact \u8C03\u7528\u5DE5\u5177 `check_learner_output`\uFF08lab_id \u7528\u672C lab id\uFF09\u3002",
-    "\u6309\u8FD4\u56DE\u7684 verdict\uFF08on-track / partial / off-track\uFF09\u51B3\u5B9A\u63A8\u8FDB\u8FD8\u662F\u7EE7\u7EED\u5F15\u5BFC\uFF1B",
-    "\u5BF9\u5B66\u5458\u53EA\u8F6C\u8FF0 hint\uFF0C\u4E0D\u900F\u9732 checkpoints \u7684\u5177\u4F53\u5185\u5BB9\u3002",
-    "",
-    "---",
-    "[NOW DO THIS] \u4EE5 Mentor \u8EAB\u4EFD\u3001\u7B80\u77ED\u53EF\u626B\u8BFB\u5730\u95EE\u5019\u5B66\u5458\uFF0C\u8BF4\u660E\u672C lab \u76EE\u6807\uFF0C\u5E76\u7ED9\u51FA\u7B2C\u4E00\u6B65\u5F15\u5BFC\u3002\u4E0D\u8981\u8D34\u53C2\u8003\u89E3\u3002"
-  ].join("\n");
+  return `# SYSTEM OPERATING INSTRUCTIONS
+
+\u4F60\u73B0\u5728\u662F\u300CMentor\u300D\uFF0C\u6B63\u5728\u5E26\u5B66\u5458\u5B8C\u6210 lab\u300C${meta.title || labId}\u300D(id: ${labId})\u3002
+\u628A\u4E0B\u9762\u5185\u5BB9\u9759\u9ED8\u5185\u5316\uFF0C\u4E0D\u539F\u6837\u663E\u793A\uFF1B\u7B2C 4 \u8282\u53C2\u8003\u89E3\u4E0E\u68C0\u67E5\u70B9\u7EDD\u4E0D\u5411\u5B66\u5458\u6CC4\u9732
+\uFF08\u7B2C 2 \u8282\u6559\u5B66\u811A\u672C\u91CC\u7684\u793A\u4F8B\u4EE3\u7801\u662F\u6559\u5B66\u6750\u6599\uFF0C\u6309\u811A\u672C\u8BB2\u89E3\u5C55\u793A\uFF0C\u4E0D\u5728\u6B64\u5217\uFF09\u3002
+
+## 1. Mentor \u4EBA\u683C\uFF08\u5168\u5C40\uFF09
+${persona}
+
+## 2. \u672C lab \u6559\u5B66\u811A\u672C\uFF08\u79C1\u5BC6\uFF09
+${teaching}
+
+## 3. \u77E5\u8BC6\u70B9\u6E05\u5355
+${kb}
+
+## 4. \u53C2\u8003\u89E3\uFF08\u79C1\u5BC6 \u2014\u2014 \u4EC5\u4F9B\u4F60\u5224\u65AD\u5B66\u5458\u8FDB\u5EA6\uFF09
+${reference}
+
+## 5. \u9636\u6BB5\u68C0\u67E5\uFF08\u52A1\u5FC5\u6267\u884C\uFF09
+\u6BCF\u5230 teaching.md \u7684\u4E00\u4E2A\u9636\u6BB5 checkpoint\uFF08\u6216\u5B66\u5458\u81EA\u8BA4\u5B8C\u6210\u4E00\u6B65\u65F6\uFF09\uFF0C\u628A\u5B66\u5458\u5F53\u524D\u4EA7\u7269
+\uFF08\u4EE3\u7801 / \u5173\u952E\u6587\u4EF6\u5185\u5BB9\uFF09\u4F5C\u4E3A artifact \u8C03\u7528\u5DE5\u5177 \`check_learner_output\`\uFF08lab_id \u7528\u672C lab id\uFF09\u3002
+\u6309\u8FD4\u56DE\u7684 verdict\uFF08on-track / partial / off-track\uFF09\u51B3\u5B9A\u63A8\u8FDB\u8FD8\u662F\u7EE7\u7EED\u5F15\u5BFC\uFF1B
+\u5BF9\u5B66\u5458\u53EA\u8F6C\u8FF0 hint\uFF0C\u4E0D\u900F\u9732 checkpoints \u7684\u5177\u4F53\u5185\u5BB9\u3002
+
+---
+[NOW DO THIS] \u4EE5 Mentor \u8EAB\u4EFD\u3001\u7B80\u77ED\u53EF\u626B\u8BFB\u5730\u95EE\u5019\u5B66\u5458\uFF0C\u8BF4\u660E\u672C lab \u76EE\u6807\uFF0C\u5E76\u7ED9\u51FA\u7B2C\u4E00\u6B65\u5F15\u5BFC\u3002\u4E0D\u8981\u8D34\u53C2\u8003\u89E3\u3002`;
 }
 async function getStatus() {
   const raw = await readIfExists(SESSION_FILE);
@@ -21553,16 +21552,14 @@ function truncate(s, n) {
 }
 async function sendToFeishu(webhookUrl, keyword, labId, reflections, codeSnapshot) {
   const kw = keyword || "review";
-  const text = [
-    `\u{1F4DA} Hi-agent Lab ${kw}`,
-    `Lab: ${labId}`,
-    "",
-    "\u3010\u53CD\u601D\u3011",
-    reflections,
-    "",
-    "\u3010\u4EE3\u7801\u5FEB\u7167\u3011",
-    truncate(codeSnapshot, 6e3)
-  ].join("\n");
+  const text = `\u{1F4DA} Hi-agent Lab ${kw}
+Lab: ${labId}
+
+\u3010\u53CD\u601D\u3011
+${reflections}
+
+\u3010\u4EE3\u7801\u5FEB\u7167\u3011
+${truncate(codeSnapshot, 6e3)}`;
   const res = await fetch(webhookUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -21576,22 +21573,20 @@ async function submitReview(labId, reflections, codeSnapshot) {
   assertSafeLabId(labId);
   await fs.mkdir(REVIEWS_DIR, { recursive: true });
   const file = path2.join(REVIEWS_DIR, `${labId}.md`);
-  const block = [
-    "",
-    "",
-    "---",
-    "",
-    `## Review @ ${(/* @__PURE__ */ new Date()).toISOString()}`,
-    "",
-    "### \u53CD\u601D",
-    reflections,
-    "",
-    "### \u4EE3\u7801\u5FEB\u7167",
-    "```",
-    codeSnapshot,
-    "```",
-    ""
-  ].join("\n");
+  const block = `
+
+---
+
+## Review @ ${(/* @__PURE__ */ new Date()).toISOString()}
+
+### \u53CD\u601D
+${reflections}
+
+### \u4EE3\u7801\u5FEB\u7167
+\`\`\`
+${codeSnapshot}
+\`\`\`
+`;
   await fs.appendFile(file, block, "utf8");
   const cfg = await readSubmissionConfig();
   let feishu = { configured: false };
@@ -21698,7 +21693,7 @@ async function checkOutput(labId, artifact) {
 }
 
 // server.js
-var server = new McpServer({ name: "hi-agent-lab", version: "0.1.1" });
+var server = new McpServer({ name: "hi-agent-lab", version: "0.1.3" });
 var json = (fn) => async (...args) => {
   const result = await fn(...args);
   const text = typeof result === "string" ? result : JSON.stringify(result);

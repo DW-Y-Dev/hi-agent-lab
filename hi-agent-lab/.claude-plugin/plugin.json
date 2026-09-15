@@ -1,7 +1,7 @@
 {
   "name": "hi-agent-lab",
   "description": "本地课件教学插件 —— 用 Mentor 人格注入 + 私密教学脚本 + 参考解对照机制带学员动手学。课件存本地 labs/，老师只需建文件夹填文件。",
-  "version": "0.2.0",
+  "version": "0.3.1",
   "author": {
     "name": "DW-Y-Dev"
   },

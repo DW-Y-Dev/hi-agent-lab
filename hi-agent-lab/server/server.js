@@ -5,7 +5,7 @@ import { z } from "zod";
 import { listLabs, startLab, getStatus, submitReview } from "./lib/labs.js";
 import { checkOutput } from "./lib/check.js";
 
-const server = new McpServer({ name: "hi-agent-lab", version: "0.1.1" });
+const server = new McpServer({ name: "hi-agent-lab", version: "0.1.3" });
 
 // 统一包装：把工具返回值序列化成 MCP 文本内容，去掉重复样板。
 // 字符串（start_lab 的注入文本）直接透传，不做 JSON 转义；对象用紧凑 JSON 省 token。
