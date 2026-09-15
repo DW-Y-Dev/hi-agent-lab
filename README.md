@@ -2,7 +2,6 @@
 
 Claude Code 教学插件 **Hi-agent Lab** —— 用 **Mentor 人格注入 + 私密教学脚本 + 参考解对照 + Socratic 引导** 带学员动手学。
 
-这是一个**插件分发仓库**：`hi-agent-lab/` 是插件本体，根目录的 `.claude-plugin/marketplace.json` 是 marketplace 清单（学生安装的入口）。
 
 ## 学生安装
 
@@ -21,7 +20,7 @@ claude plugin install hi-agent-lab
 
 ## 课件更新（已安装的同学）
 
-老师发布新课件后，**不要重跑 `install`**——已安装时它会直接跳过、不会拉新版本。用：
+老师发布新课件后，**不要重跑 `install`**。用：
 
 ```bash
 # 升级到最新版，然后重启 Claude Code 生效
@@ -33,13 +32,9 @@ claude plugin update hi-agent-lab
 ```
 ├── .claude-plugin/marketplace.json   # marketplace 清单（分发给学生的入口）
 ├── hi-agent-lab/                     # ★ 插件本体
-│   ├── README.md                     # 插件完整文档
 │   ├── persona.md                    # 全局 Mentor 人格（所有 lab 共用）
 │   ├── commands/                     # 斜杠命令（/hi-agent*）
 │   ├── server/                       # MCP server（Node + 官方 SDK）
 │   └── labs/                         # ★ 课件区 —— 老师在这里加 lab
 ```
 
-## 给老师：如何加一门课
-
-**加一个 lab = 在 `hi-agent-lab/labs/` 下建文件夹 + 填 3 个文件**（`meta.json` / `teaching.md` / `reference.md`，`kb.md` 可选）。各文件的写法、示例与完整机制见 [`hi-agent-lab/README.md`](hi-agent-lab/README.md)（唯一维护处，本文件不再重复）。
