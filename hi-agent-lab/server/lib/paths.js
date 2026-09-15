@@ -11,7 +11,7 @@ export const LABS_DIR = path.join(pluginRoot, "labs");
 export const REVIEWS_DIR = path.join(pluginRoot, "reviews");
 export const SESSION_FILE = path.join(pluginRoot, ".session.json");
 export const PERSONA_FILE = path.join(pluginRoot, "persona.md");
-// 提交配置：feishu_webhook 等，gitignore 掉，不进公开仓库
+// 提交配置：feishu_webhook 等，随仓库分发，学生装好即用（webhook 属公开凭据，被滥用时轮换机器人即可）
 export const SUBMISSION_FILE = path.join(pluginRoot, "submission.json");
 
 /** labId 只允许小写字母/数字/短横线/下划线，堵住 path.join 的目录穿越。 */

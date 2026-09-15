@@ -2,6 +2,6 @@
   "id": "week01_llm_app",
   "title": "工程故障分析助手",
   "stage": 1,
-  "duration": "2–3h",
-  "summary": "两段式教学：先讲结构化输出与 Pydantic 基础知识点并答题检测，再逐段讲解示例代码并对代码提问。"
+  "duration": "1–2h",
+  "summary": "自然语言输入设备故障描述，要求输出结构化的 FaultDiagnosis 对象。"
 }

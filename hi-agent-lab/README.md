@@ -27,6 +27,7 @@ hi-agent-lab/
 │   ├── dist/server.js         # ★ 打包产物（自包含，.mcp.json 指向这里）
 │   └── lib/{paths,labs,check}.js
 ├── labs/                      # ★ 课件区 —— 老师在这里加 lab
+├── submission.json            # 提交配置：feishu_webhook（随仓库分发，学生装好即用）
 └── reviews/                   # (运行时生成) 提交的 review
 ```
 
@@ -153,7 +154,7 @@ Mentor 的通用人格（语气、禁忌、`📚 [Lab ...]` 结尾格式）。�
    → 想真正「held-out」：把 `reference.md`（和 `check_learner_output` 的比对逻辑）挪到一个服务端，
    MCP server 改成 HTTP 调它，让 `check_learner_output` 在**服务端**和参考解比对，
    答案永不下发。
-2. **review 落到本地文件**而非发给真人。想自动批改/邮件，把 `submit_review` 的后半段换成推给后端或 SMTP。
+2. **review 走课程群飞书机器人**：`submission.json`（webhook 随仓库分发）配置的群机器人接收学员提交，同时落本地 `reviews/`。webhook 属公开凭据——被滥用时删掉机器人重新生成、更新此文件即可；要严格的收发控制请换成后端中转。
 3. **无 OTP 登录 / 无账号体系**。多人场景需要后端加身份。
 4. **检查是启发式**（token 重叠），只做教学参考，不是真验收。真机验收请用服务端 held-out 打分器。
 
